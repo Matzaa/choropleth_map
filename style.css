@@ -5,3 +5,9 @@ body {
     align-items: center;
     font-family: Arial, Helvetica, sans-serif;
 }
+
+#base {
+    width: 1100px;
+    height: 600px;
+    background-color: pink;
+}
