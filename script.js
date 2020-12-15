@@ -86,7 +86,7 @@
             .attr("width", legendSquareW)
             .attr("height", 30);
 
-        const legendAxis = d3.axisBottom(x);
+        const legendAxis = d3.axisBottom(x).tickFormat((x) => x + "%");
 
         legend
             .append("g")
@@ -128,7 +128,12 @@
                     .style("top", e.pageY - 20 + "px")
                     .style("transform", "translateX(100px)")
                     .style("visibility", "visible")
-                    .html(`<p>${d.id}</p>`)
+                    .html(() => {
+                        let res = userEdu.filter((el) => el.fips === d.id);
+
+                        return `<p>${res[0].state}</p> <p>${res[0].bachelorsOrHigher}%</p>`;
+                    })
+
                     .attr("data-education", () => {
                         let res = userEdu.filter((el) => el.fips === d.id);
                         return res[0].bachelorsOrHigher;
