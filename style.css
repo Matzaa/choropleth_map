@@ -11,3 +11,10 @@ body {
     height: 600px;
     background-color: pink;
 }
+
+h1,
+h4 {
+    color: rgb(255, 123, 123);
+    letter-spacing: 4px;
+    margin: 50px;
+}
