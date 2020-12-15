@@ -1,6 +1,7 @@
 (function () {
     let userEdu;
     let counties;
+
     const countyUrl =
         "https://cdn.freecodecamp.org/testable-projects-fcc/data/choropleth_map/counties.json";
     const userUrl =
@@ -10,15 +11,12 @@
         if (error) {
             console.log(log);
         } else {
-            console.log("data: ", data);
             counties = topojson.feature(data, data.objects.counties).features;
-            console.log("counties ", counties);
             d3.json(userUrl).then((data, error) => {
                 if (error) {
                     console.log("error: ", error);
                 } else {
                     userEdu = data;
-                    console.log("userEdu: ", userEdu);
                     makeChart();
                 }
             });
@@ -28,14 +26,21 @@
     function makeChart() {
         let base = d3.select("#base");
 
+        // tooltip
+
+        const tooltip = d3
+            .select("body")
+            .append("div")
+            .attr("id", "tooltip")
+            .style("width", 100)
+            .style("height", 50)
+            .style("z-index", "10")
+            .style("visibility", "hidden")
+            .text("");
+
         // colors
 
         const colors = [
-            // "rgb(115, 230, 186)",
-            // // "rgb(255, 123, 123)",
-            // "rgb(231, 223, 111)",
-            // "rgb(230, 180, 115)",
-            // "rgb(231, 94, 94)",
             "#f8d1c9",
             "#d2a5a8",
             "#a58f9b",
@@ -55,11 +60,6 @@
         // legend
 
         const legendSquareW = 40;
-        console.log(
-            "minimum",
-            d3.max(userEdu, (d) => d.bachelorsOrHigher)
-        );
-        console.log("colorscale: ", colorScale(0));
 
         const x = d3
             .scaleLinear()
@@ -95,7 +95,8 @@
 
         // map
 
-        base.selectAll("path")
+        base.append("g")
+            .selectAll("path")
             .data(counties)
             .enter()
             .append("path")
@@ -103,11 +104,11 @@
             .attr("class", "county")
             .attr("data-fips", (d) => d.id)
             .attr("data-education", (d) => {
-                return userEdu.filter((el) => el.fips === d.id);
+                let res = userEdu.filter((el) => el.fips === d.id);
+                return res[0].bachelorsOrHigher;
             })
             .attr("fill", function (d) {
                 let result = userEdu.filter((el) => el.fips === d.id);
-                // console.log("result: ", result);
                 if (result[0].bachelorsOrHigher <= colorScale(1)) {
                     return colors[0];
                 } else if (result[0].bachelorsOrHigher <= colorScale(2)) {
@@ -120,6 +121,21 @@
                     return colors[3];
                 }
             })
-            .attr("stroke", "beige");
+            .attr("stroke", "beige")
+            .on("mouseover", (e, d) => {
+                tooltip
+                    .style("left", e.pageX - 100 + "px")
+                    .style("top", e.pageY - 20 + "px")
+                    .style("transform", "translateX(100px)")
+                    .style("visibility", "visible")
+                    .html(`<p>${d.id}</p>`)
+                    .attr("data-education", () => {
+                        let res = userEdu.filter((el) => el.fips === d.id);
+                        return res[0].bachelorsOrHigher;
+                    });
+            })
+            .on("mouseout", () => {
+                tooltip.style("visibility", "hidden");
+            });
     }
 })();
